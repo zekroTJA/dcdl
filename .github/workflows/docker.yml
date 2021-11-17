@@ -39,4 +39,4 @@ jobs:
           push: true
           no-cache: true
           tags: |
-            ghcr.io/zekrotja/shinpuru:${{ env.TAG }}
+            ghcr.io/zekrotja/dcdl:${{ env.TAG }}
