@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  dcdl:
+    image: "ghcr.io/zekrotja/dcdl:latest"
+    ports:
+      - "80:80"
+    expose:
+      - "80"
+    environment:
+      DCDL_DISCORD_TOKEN:           "<your token>"
+      DCDL_STORAGE_LIFETIMESECONDS: 600
+      DCDL_WEBSERVER_PUBLICADDRESS: "https://example.com"
+  
