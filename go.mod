@@ -19,7 +19,7 @@ require (
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/zekrotja/ken v0.10.4
+	github.com/zekrotja/ken v0.10.5-0.20211118082514-9fa4f88498f9
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 )
 

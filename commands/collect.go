@@ -10,7 +10,7 @@ import (
 	"github.com/zekrotja/dcdl/services/storage"
 	"github.com/zekrotja/dcdl/static"
 	"github.com/zekrotja/ken"
-	"github.com/zekrotja/ken/middlewares/ratelimit"
+	"github.com/zekrotja/ken/middlewares/ratelimit/v2"
 )
 
 type Collect struct {
@@ -97,10 +97,17 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 		limit = int(v.IntValue())
 	}
 
-	if limit < 0 {
+	totalLimit := int(c.Cfg.Instance().Discord.MessageLimit)
+
+	if limit < 0 || (limit > totalLimit && totalLimit != 0) {
+		add := ""
+		if totalLimit != 0 {
+			add = fmt.Sprintf(" (but not larger than `%d`)", totalLimit)
+		}
 		err = ctx.FollowUpError(
-			"Limit must be either `0` (equals unlimited) or a value larger than `0`.",
+			"Limit must be either `0` (equals unlimited) or a value larger than `0`"+add+".",
 			"Argument Error").Error
+		ratelimit.Skip(ctx)
 		return
 	}
 
@@ -118,6 +125,7 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 		err = ctx.FollowUpError(
 			"Either `include-metadata` or `include-files` must be set to `true`.",
 			"Argument Error").Error
+		ratelimit.Skip(ctx)
 		return
 	}
 
@@ -153,7 +161,7 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 			return
 		}
 
-		if curr >= limit && limit != 0 {
+		if curr >= limit && limit != 0 || curr >= totalLimit && totalLimit != 0 {
 			break
 		}
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/zekrotja/dcdl/services/storage"
 	"github.com/zekrotja/dcdl/static"
 	"github.com/zekrotja/ken"
-	"github.com/zekrotja/ken/middlewares/ratelimit"
+	"github.com/zekrotja/ken/middlewares/ratelimit/v2"
 	"github.com/zekrotja/ken/state"
 	"github.com/zekrotja/ken/store"
 )

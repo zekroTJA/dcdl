@@ -8,11 +8,12 @@ type ConfigModel struct {
 
 type DiscordConfigModel struct {
 	Token           string `json:"token"`
-	CooldownSeconds int    `json:"cooldownseconds"`
+	CooldownSeconds uint   `json:"cooldownseconds"`
+	MessageLimit    uint   `json:"messageslimit"`
 }
 
 type StorageConfigModel struct {
-	LifetimeSeconds int    `json:"lifetimeseconds"`
+	LifetimeSeconds uint   `json:"lifetimeseconds"`
 	Location        string `json:"lcoation"`
 }
 
@@ -32,5 +33,6 @@ var DefaultConfig = ConfigModel{
 	},
 	Discord: DiscordConfigModel{
 		CooldownSeconds: 10 * 60,
+		MessageLimit:    100_000,
 	},
 }
