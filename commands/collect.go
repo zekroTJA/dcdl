@@ -33,7 +33,7 @@ func (c *Collect) Description() string {
 }
 
 func (c *Collect) Version() string {
-	return "1.0.0"
+	return "1.1.0"
 }
 
 func (c *Collect) Type() discordgo.ApplicationCommandType {
