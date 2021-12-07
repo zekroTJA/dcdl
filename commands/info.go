@@ -44,7 +44,7 @@ func (c *Info) Run(ctx *ken.Ctx) (err error) {
 			"from sent messages in a Discord channel.\n\n" +
 			"Simply use the `/collect` slash command in the channel you want to collect images from and " +
 			"the bot will start collecting all messages, analyzing them for attachments and then downloading them " +
-			"to the bot's storage. Afetr that, you will receive a link to download an archive with the attachments.\n\n" +
+			"to the bot's storage. After that, you will receive a link to download an archive with the attachments.\n\n" +
 			"For more information, read the [**Readme**](https://github.com/zekroTJA/dcdl/blob/master/README.md) on GitHub.",
 		Fields: []*discordgo.MessageEmbedField{
 			{
