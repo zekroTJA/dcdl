@@ -51,6 +51,7 @@ func (s *Local) Store(
 	msgs []*discordgo.Message,
 	includeMetadata,
 	includeFiles bool,
+	cStatus chan<- *discordgo.MessageAttachment,
 ) (err error) {
 	file, err := os.Create(s.floc(id))
 	if err != nil {
@@ -64,6 +65,9 @@ func (s *Local) Store(
 	if includeFiles {
 		for _, msg := range msgs {
 			for _, att := range msg.Attachments {
+				if cStatus != nil {
+					cStatus <- att
+				}
 				fName := fmt.Sprintf("%s-%s", msg.ID, att.Filename)
 				var w io.Writer
 				w, err = zw.Create(path.Join("files", fName))

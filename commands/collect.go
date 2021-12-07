@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/rs/xid"
+	"github.com/zekroTJA/shinpuru/pkg/bytecount"
 	"github.com/zekrotja/dcdl/services/config"
 	"github.com/zekrotja/dcdl/services/storage"
 	"github.com/zekrotja/dcdl/static"
@@ -167,7 +168,7 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 	}
 
 	emb := processEmbed(fmt.Sprintf(
-		"Downloading attachments of collected messages (`%d`) ...\n\n"+
+		"Downloading attachments of collected messages (`%d`) ...\n"+
 			"*This can take some time depending on the size of the attachments.*",
 		len(allMsgs)))
 	if err = fum.EditEmbed(emb); err != nil {
@@ -176,7 +177,22 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 
 	id := fmt.Sprintf("%s-%s-%s", ctx.Event.GuildID, ch.ID, xid.New().String())
 
-	err = c.St.Store(id, allMsgs, includeMetadata, includeFiles)
+	var cStatus chan *discordgo.MessageAttachment
+	if includeFiles {
+		cStatus = make(chan *discordgo.MessageAttachment)
+		go func() {
+			for att := range cStatus {
+				emb := processEmbed(fmt.Sprintf(
+					"Downloading attachments of collected messages (`%d`) ...\n"+
+						"*This can take some time depending on the size of the attachments.*\n\n"+
+						"Downloading `%s` (%s)...",
+					len(allMsgs), att.Filename, bytecount.Format(uint64(att.Size))))
+				fum.EditEmbed(emb)
+			}
+		}()
+	}
+
+	err = c.St.Store(id, allMsgs, includeMetadata, includeFiles, cStatus)
 	if err != nil {
 		return
 	}
