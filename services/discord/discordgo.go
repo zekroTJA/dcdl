@@ -63,6 +63,7 @@ func NewDiscordGo(cfg config.ConfigProvider, st storage.StorageProvider) (dg *Di
 
 	err = dg.ken.RegisterCommands(
 		&commands.Collect{st, cfg},
+		&commands.Info{},
 	)
 
 	return
