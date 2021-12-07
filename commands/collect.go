@@ -20,7 +20,7 @@ type Collect struct {
 }
 
 var (
-	_ ken.Command              = (*Collect)(nil)
+	_ ken.SlashCommand         = (*Collect)(nil)
 	_ ratelimit.LimitedCommand = (*Collect)(nil)
 )
 
