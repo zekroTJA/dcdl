@@ -167,10 +167,34 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 		}
 	}
 
-	emb := processEmbed(fmt.Sprintf(
-		"Downloading attachments of collected messages (`%d`) ...\n"+
-			"*This can take some time depending on the size of the attachments.*",
-		len(allMsgs)))
+	attCount := 0
+	attTotalSize := 0
+	for _, msg := range allMsgs {
+		attCount += len(msg.Attachments)
+		for _, att := range msg.Attachments {
+			attTotalSize += att.Size
+		}
+	}
+
+	if attCount == 0 {
+		err = fum.EditEmbed(&discordgo.MessageEmbed{
+			Color:       static.ColorError,
+			Description: "Collected messages do not contain any attachments.",
+		})
+		return
+	}
+
+	var emb *discordgo.MessageEmbed
+	if includeFiles {
+		emb = processEmbed(fmt.Sprintf(
+			"Downloading attachments of collected messages (`%d` attachments) ...\n"+
+				"*This can take some time depending on the size of the attachments.*",
+			attCount))
+	} else {
+		emb = processEmbed(fmt.Sprintf(
+			"Assembling attachment metadata (`%d` attachments) ...\n",
+			attCount))
+	}
 	if err = fum.EditEmbed(emb); err != nil {
 		return
 	}
@@ -181,12 +205,14 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 	if includeFiles {
 		cStatus = make(chan *discordgo.MessageAttachment)
 		go func() {
+			i := 0
 			for att := range cStatus {
+				i++
 				emb := processEmbed(fmt.Sprintf(
-					"Downloading attachments of collected messages (`%d`) ...\n"+
+					"Downloading attachments of collected messages (`%d`/`%d` attachments) ...\n"+
 						"*This can take some time depending on the size of the attachments.*\n\n"+
 						"Downloading `%s` (%s)...",
-					len(allMsgs), att.Filename, bytecount.Format(uint64(att.Size))))
+					i, attCount, att.Filename, bytecount.Format(uint64(att.Size))))
 				fum.EditEmbed(emb)
 			}
 		}()
@@ -215,7 +241,6 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 	if err != nil {
 		return fallback()
 	}
-
 	if _, err = ctx.Session.ChannelMessageSendEmbed(dmCh.ID, emb); err != nil {
 		return fallback()
 	}
