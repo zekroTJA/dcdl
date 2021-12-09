@@ -20,7 +20,28 @@ Here, you can now specify following optional arguments.
 
 ### Download via `metadata.json`
 
-You can also download the attachments on your system using the `metadata.json` file from the archive using the following command.
+You can also download the attachments on your system using the `metadata.json` file from the archive.
+
+The easy way is to use the povided downloader tool which consumes the `metadata.json` and downloads the listed atatchment files.
+
+You can download the precompiled downloader tool form the [Actions build artifacts](https://github.com/zekroTJA/dcdl/actions/workflows/artifacts.yml). Just click on the latest successful job and download the desired binary for your system.
+
+These are the available option flags:
+```
+Usage of downloader:
+  -filter string
+        Filter attachments to download by UIDs (comma separated list).
+  -i string
+        The location of the metadata file. (default "metadata.json")
+  -o string
+        The output directory. (default "files")
+  -parallel uint
+        Parralell download count. (default 2)
+  -split
+        Split the downloaded files into seperate folders by author user ID.
+```
+
+You can also do it via the console using a combination of `jq`, `xargs` and `curl`, which is - of course - the way cooler way. 😎
 
 > Therefore, you need `curl` and `jq` installed. If you are on windows, use WSL. 😉
 ```
