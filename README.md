@@ -18,6 +18,12 @@ Here, you can now specify following optional arguments.
 
 - `include-files`: Whether or not download and include the attachment files. You can set this to `false` if you want to download the files from your system using the `metadata.json` file. This defaults to `true`.
 
+After that, the bot will start to analyze all messages in the channel. This can take some time depending on the amount of messages in the channel. Then, all attachments will be collected and downloaded. After that, you will receive a DM with a download link where you can download the full archive.
+
+![image](https://user-images.githubusercontent.com/16734205/145380449-b7d564e3-9e54-4f97-a36a-a1bb8d088991.png)
+
+When the total attachment size exceeds the configured maximum, you will only be able to download the `metadata.json` file. But no worries, you can use this on your local system to download all attachments using the provided downloader tool (see following section).
+
 ### Download via `metadata.json`
 
 You can also download the attachments on your system using the `metadata.json` file from the archive.
