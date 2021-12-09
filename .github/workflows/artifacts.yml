@@ -42,7 +42,7 @@ jobs:
       - name: Upload Artifcats
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.goos }}-${{ matrix.goarch }}
+          name: dcdl-${{ matrix.goos }}-${{ matrix.goarch }}
           path: ./bin/
 
   build_artifacts_downloader:
@@ -79,5 +79,5 @@ jobs:
       - name: Upload Artifcats
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.goos }}-${{ matrix.goarch }}
+          name: downloader-${{ matrix.goos }}-${{ matrix.goarch }}
           path: ./bin/
