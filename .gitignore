@@ -17,3 +17,5 @@ vendor/
 .commandCache.json
 data/
 .env
+metadata.json
+files/
