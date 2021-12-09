@@ -15,7 +15,7 @@ import (
 	"github.com/zekrotja/ken/middlewares/ratelimit/v2"
 )
 
-const askForDownloadSize = 1 * 1024 // * 1024 * 1024 // 1GiB
+const askForDownloadSize = 1 * 1024 * 1024 * 1024 // 1GiB
 
 type Collect struct {
 	St  storage.StorageProvider
