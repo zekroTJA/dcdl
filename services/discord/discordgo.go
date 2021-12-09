@@ -15,7 +15,7 @@ import (
 	"github.com/zekrotja/ken/store"
 )
 
-const intents = discordgo.IntentsGuilds
+const intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessageReactions
 
 type DiscordGo struct {
 	*discordgo.Session

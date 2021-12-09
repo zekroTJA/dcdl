@@ -7,6 +7,7 @@ import (
 	"github.com/traefik/paerser/file"
 	"github.com/traefik/paerser/flag"
 	"github.com/zekrotja/dcdl/models"
+	"github.com/zekrotja/dcdl/pkg/bsizeparser"
 )
 
 const defaultConfigLoc = "./config.yaml"
@@ -53,6 +54,7 @@ func (p *Paerser) Load() (err error) {
 		return
 	}
 
+	cfg.Discord.SizeLimitU, err = bsizeparser.Parse(cfg.Discord.SizeLimit)
 	p.cfg = &cfg
 
 	return

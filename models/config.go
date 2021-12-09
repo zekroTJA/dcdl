@@ -10,6 +10,9 @@ type DiscordConfigModel struct {
 	Token           string `json:"token"`
 	CooldownSeconds uint   `json:"cooldownseconds"`
 	MessageLimit    uint   `json:"messageslimit"`
+	SizeLimit       string `json:"sizelimit"`
+
+	SizeLimitU uint64 `json:"-"`
 }
 
 type StorageConfigModel struct {
@@ -34,5 +37,6 @@ var DefaultConfig = ConfigModel{
 	Discord: DiscordConfigModel{
 		CooldownSeconds: 10 * 60,
 		MessageLimit:    100_000,
+		SizeLimit:       "5G",
 	},
 }

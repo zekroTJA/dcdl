@@ -7,12 +7,15 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/rs/xid"
 	"github.com/zekroTJA/shinpuru/pkg/bytecount"
+	"github.com/zekrotja/dcdl/pkg/accmsgutil"
 	"github.com/zekrotja/dcdl/services/config"
 	"github.com/zekrotja/dcdl/services/storage"
 	"github.com/zekrotja/dcdl/static"
 	"github.com/zekrotja/ken"
 	"github.com/zekrotja/ken/middlewares/ratelimit/v2"
 )
+
+const askForDownloadSize = 1 * 1024 // * 1024 * 1024 // 1GiB
 
 type Collect struct {
 	St  storage.StorageProvider
@@ -182,6 +185,38 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 			Description: "Collected messages do not contain any attachments.",
 		})
 		return
+	}
+
+	maxTotalSize := c.Cfg.Instance().Discord.SizeLimitU
+	if includeFiles {
+		var ok bool
+		if uint64(attTotalSize) > maxTotalSize {
+			ok, err = accmsgutil.Wrap(ctx, fmt.Sprintf(
+				"Total attachment size (`%s`) exceed configured maximum attachment size (`%s`).\n\n"+
+					"Do you want to continue with only the metadata file?",
+				bytecount.Format(uint64(attTotalSize)), bytecount.Format(maxTotalSize)))
+			if err != nil {
+				return
+			}
+			if !ok {
+				err = fum.EditEmbed(&discordgo.MessageEmbed{
+					Color:       static.ColorError,
+					Description: "Canceled.",
+				})
+				return
+			}
+			includeFiles = false
+		} else if uint64(attTotalSize) >= askForDownloadSize {
+			ok, err = accmsgutil.Wrap(ctx, fmt.Sprintf(
+				"Total attachment size (`%s`) is fairly large and might take some while to download.\n\n"+
+					"Do you rather just want to download the metadata file and download the atatchments yourself?\n"+
+					"*(Cancel to proceed with attachment download)*",
+				bytecount.Format(uint64(attTotalSize))))
+			if err != nil {
+				return
+			}
+			includeFiles = !ok
+		}
 	}
 
 	var emb *discordgo.MessageEmbed
