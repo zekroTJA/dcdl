@@ -2,6 +2,44 @@
 
 This is a Discord bot for downloading attachments from channel messages.
 
+## Usage
+
+Now, go into a text channel and type `/collect`. Then, the command should pop up.
+
+![image](https://user-images.githubusercontent.com/16734205/142413107-59374f21-36d3-4512-abaf-b12a95435e6f.png)
+
+Here, you can now specify following optional arguments.
+
+- `channel`: The target channel. This is set to the current channel if not specified.
+
+- `limit`: The maximum amount of messages to be fetched. This defaults to `0` (equals all messages in the channel) or the globally set limit.
+
+- `include-metadata`: Whether or not to include a `metadata.json` in the colelction package containing information about each message containing attachments. This defaults to `true`.
+
+- `include-files`: Whether or not download and include the attachment files. You can set this to `false` if you want to download the files from your system using the `metadata.json` file. This defaults to `true`.
+
+### Download via `metadata.json`
+
+You can also download the attachments on your system using the `metadata.json` file from the archive using the following command.
+
+> Therefore, you need `curl` and `jq` installed. If you are on windows, use WSL. 😉
+```
+$ mkdir files && cat metadata.json | jq -r '.[].attachments[] | [ .archive_filename, .url ] | join(" ")' | xargs -l bash -c 'curl -Lo "files/$0" "$1"'
+```
+
+You can even do stuff like filter by author ID, for example, using the following command.
+```
+$ cat metadata.json | jq -r '.[] | select( .author_id == "221905671296253953" )
+```
+
+... and then combine it with the download command to just download attachments sent by that specific user.
+
+```
+$ mkdir files && cat metadata.json | jq -r '.[] | select( .author_id == "221905671296253953" ) | .attachments[] | [ .archive_filename, .url ] | join(" ")' | xargs -l bash -c 'curl -Lo "files/$0" "$1"'
+```
+
+*Man, `jq` is really one of the most useful CLI tool ever created, inst it?* 😄
+
 ## Setup
 
 First, set up a Discord bot application (see [here](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot) how to do so).
@@ -49,41 +87,3 @@ After that, start the bot with the following command line.
 ```
 $ ./dcdl -c config.yml
 ```
-
-## Usage
-
-Now, go into a text channel and type `/collect`. Then, the command should pop up.
-
-![image](https://user-images.githubusercontent.com/16734205/142413107-59374f21-36d3-4512-abaf-b12a95435e6f.png)
-
-Here, you can now specify following optional arguments.
-
-- `channel`: The target channel. This is set to the current channel if not specified.
-
-- `limit`: The maximum amount of messages to be fetched. This defaults to `0` (equals all messages in the channel) or the globally set limit.
-
-- `include-metadata`: Whether or not to include a `metadata.json` in the colelction package containing information about each message containing attachments. This defaults to `true`.
-
-- `include-files`: Whether or not download and include the attachment files. You can set this to `false` if you want to download the files from your system using the `metadata.json` file. This defaults to `true`.
-
-## Download via `metadata.json`
-
-You can also download the attachments on your system using the `metadata.json` file from the archive using the following command.
-
-> Therefore, you need `curl` and `jq` installed. If you are on windows, use WSL. 😉
-```
-$ mkdir files && cat metadata.json | jq -r '.[].attachments[] | [ .archive_filename, .url ] | join(" ")' | xargs -l bash -c 'curl -Lo "files/$0" "$1"'
-```
-
-You can even do stuff like filter by author ID, for example, using the following command.
-```
-$ cat metadata.json | jq -r '.[] | select( .author_id == "221905671296253953" )
-```
-
-... and then combine it with the download command to just download attachments sent by that specific user.
-
-```
-$ mkdir files && cat metadata.json | jq -r '.[] | select( .author_id == "221905671296253953" ) | .attachments[] | [ .archive_filename, .url ] | join(" ")' | xargs -l bash -c 'curl -Lo "files/$0" "$1"'
-```
-
-*Man, `jq` is really one of the most useful CLI tool ever created, inst it?* 😄
