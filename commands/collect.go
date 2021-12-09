@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/rs/xid"
 	"github.com/zekroTJA/shinpuru/pkg/bytecount"
+	"github.com/zekrotja/dcdl/models"
 	"github.com/zekrotja/dcdl/pkg/accmsgutil"
 	"github.com/zekrotja/dcdl/services/config"
 	"github.com/zekrotja/dcdl/services/storage"
@@ -68,6 +69,11 @@ func (c *Collect) Options() []*discordgo.ApplicationCommandOption {
 			Name:        "include-files",
 			Description: "Include attachment files (true in unset).",
 		},
+		{
+			Type:        discordgo.ApplicationCommandOptionBoolean,
+			Name:        "filter-duplicates",
+			Description: "Exclude duplicate files in the result (true if unset).",
+		},
 	}
 }
 
@@ -123,6 +129,11 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 	includeFiles := true
 	if v, ok := ctx.Options().GetByNameOptional("include-files"); ok {
 		includeFiles = v.BoolValue()
+	}
+
+	excludeDuplicates := true
+	if v, ok := ctx.Options().GetByNameOptional("filter-duplicates"); ok {
+		excludeDuplicates = v.BoolValue()
 	}
 
 	if !(includeMetadata || includeFiles) {
@@ -236,9 +247,9 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 
 	id := fmt.Sprintf("%s-%s-%s", ctx.Event.GuildID, ch.ID, xid.New().String())
 
-	var cStatus chan *discordgo.MessageAttachment
+	var cStatus chan *models.AttMetadata
 	if includeFiles {
-		cStatus = make(chan *discordgo.MessageAttachment)
+		cStatus = make(chan *models.AttMetadata)
 		go func() {
 			i := 0
 			for att := range cStatus {
@@ -253,7 +264,7 @@ func (c *Collect) Run(ctx *ken.Ctx) (err error) {
 		}()
 	}
 
-	err = c.St.Store(id, allMsgs, includeMetadata, includeFiles, cStatus)
+	err = c.St.Store(id, allMsgs, includeMetadata, includeFiles, excludeDuplicates, cStatus)
 	if err != nil {
 		return
 	}

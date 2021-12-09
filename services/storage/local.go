@@ -14,6 +14,7 @@ import (
 	"github.com/zekroTJA/timedmap"
 	"github.com/zekrotja/dcdl/models"
 	"github.com/zekrotja/dcdl/services/config"
+	"github.com/zekrotja/dcdl/util/hasher"
 )
 
 type Local struct {
@@ -39,7 +40,8 @@ func (s *Local) Store(
 	msgs []*discordgo.Message,
 	includeMetadata,
 	includeFiles bool,
-	cStatus chan<- *discordgo.MessageAttachment,
+	excludeDuplicates bool,
+	cStatus chan<- *models.AttMetadata,
 ) (err error) {
 	file, err := os.Create(s.floc(id))
 	if err != nil {
@@ -50,13 +52,59 @@ func (s *Local) Store(
 	zw := zip.NewWriter(file)
 	defer zw.Close()
 
+	hashes := make(map[string]bool)
+
+	metas := make([]models.MsgMetadata, len(msgs))
+	for i, msg := range msgs {
+		m := models.MsgMetadata{
+			GuildID:     msg.GuildID,
+			ChannelID:   msg.ChannelID,
+			MessageID:   msg.ID,
+			AuthorID:    msg.Author.ID,
+			Attachments: make([]models.AttMetadata, len(msg.Attachments)),
+		}
+		for j, att := range msg.Attachments {
+			hash, err := hasher.Hash(att.Width, att.Height, att.Size)
+			if err != nil {
+				return err
+			}
+			isDuplicate := hashes[hash]
+			if !isDuplicate {
+				hashes[hash] = true
+			}
+			m.Attachments[j] = models.AttMetadata{
+				ArchiveFilename:   fmt.Sprintf("%s-%s", msg.ID, att.Filename),
+				Hash:              hash,
+				IsDuplicate:       isDuplicate,
+				MessageAttachment: att,
+			}
+		}
+		metas[i] = m
+	}
+
+	if includeMetadata {
+		var w io.Writer
+		w, err = zw.Create("metadata.json")
+		if err != nil {
+			return
+		}
+		enc := json.NewEncoder(w)
+		enc.SetIndent("", "  ")
+		if err = enc.Encode(metas); err != nil {
+			return
+		}
+	}
+
 	if includeFiles {
-		for _, msg := range msgs {
+		for _, msg := range metas {
 			for _, att := range msg.Attachments {
 				if cStatus != nil {
-					cStatus <- att
+					cStatus <- &att
 				}
-				fName := fmt.Sprintf("%s-%s", msg.ID, att.Filename)
+				if excludeDuplicates && att.IsDuplicate {
+					continue
+				}
+				fName := fmt.Sprintf("%s-%s", msg.MessageID, att.Filename)
 				var w io.Writer
 				w, err = zw.Create(path.Join("files", fName))
 				if err != nil {
@@ -67,37 +115,6 @@ func (s *Local) Store(
 					return
 				}
 			}
-		}
-	}
-
-	if includeMetadata {
-		metas := make([]models.MsgMetadata, len(msgs))
-		for i, msg := range msgs {
-			m := models.MsgMetadata{
-				GuildID:     msg.GuildID,
-				ChannelID:   msg.ChannelID,
-				MessageID:   msg.ID,
-				AuthorID:    msg.Author.ID,
-				Attachments: make([]models.AttMetadata, len(msg.Attachments)),
-			}
-			for j, att := range msg.Attachments {
-				m.Attachments[j] = models.AttMetadata{
-					ArchiveFilename:   fmt.Sprintf("%s-%s", msg.ID, att.Filename),
-					MessageAttachment: att,
-				}
-			}
-			metas[i] = m
-		}
-
-		var w io.Writer
-		w, err = zw.Create("metadata.json")
-		if err != nil {
-			return
-		}
-		enc := json.NewEncoder(w)
-		enc.SetIndent("", "  ")
-		if err = enc.Encode(metas); err != nil {
-			return
 		}
 	}
 

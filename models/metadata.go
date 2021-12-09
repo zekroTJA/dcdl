@@ -4,6 +4,8 @@ import "github.com/bwmarrin/discordgo"
 
 type AttMetadata struct {
 	ArchiveFilename string `json:"archive_filename"`
+	Hash            string `json:"hash"`
+	IsDuplicate     bool   `json:"is_duplicate"`
 	*discordgo.MessageAttachment
 }
 
