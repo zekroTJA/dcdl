@@ -8,8 +8,8 @@ on:
       - "**.md"
 
 jobs:
-  build_artifacts:
-    name: Build Artifcats
+  build_artifacts_bot:
+    name: Build Artifcats (Bot)
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -38,6 +38,43 @@ jobs:
         if: ${{ matrix.goos == 'windows' }}
         env:
           FNAME: ./bin/dcdl-${{ matrix.goos }}-${{ matrix.goarch }}
+        run: mv ${{ env.FNAME }} ${{ env.FNAME }}.exe
+      - name: Upload Artifcats
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ./bin/
+
+  build_artifacts_downloader:
+    name: Build Artifcats (Downloader)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos:
+          - linux
+          - windows
+          - darwin
+        goarch:
+          - amd64
+          - arm64
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: "^1.17"
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: Get dependencies
+        run: go get ./...
+      - name: Build Client (${{ matrix.goos }}-${{ matrix.goarch }})
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: go build -v -o ./bin/downloader-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/downloader/main.go
+      - name: Rename Windows Binary
+        if: ${{ matrix.goos == 'windows' }}
+        env:
+          FNAME: ./bin/downloader-${{ matrix.goos }}-${{ matrix.goarch }}
         run: mv ${{ env.FNAME }} ${{ env.FNAME }}.exe
       - name: Upload Artifcats
         uses: actions/upload-artifact@v2
