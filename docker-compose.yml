@@ -10,5 +10,8 @@ services:
     environment:
       DCDL_DISCORD_TOKEN:           "<your token>"
       DCDL_STORAGE_LIFETIMESECONDS: 600
+      DCDL_DISCORD_COOLDOWNSECONDS: 60
+      DCDL_DISCORD_MESSAGELIMIT:    100000
+      DCDL_DISCORD_SIZELIMIT:       10G
       DCDL_WEBSERVER_PUBLICADDRESS: "https://example.com"
   
