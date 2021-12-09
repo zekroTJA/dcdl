@@ -12,21 +12,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/valyala/fasthttp"
 	"github.com/zekroTJA/timedmap"
+	"github.com/zekrotja/dcdl/models"
 	"github.com/zekrotja/dcdl/services/config"
 )
-
-type attMetadata struct {
-	ArchiveFilename string `json:"archive_filename"`
-	*discordgo.MessageAttachment
-}
-
-type msgMetadata struct {
-	GuildID     string        `json:"guild_id"`
-	ChannelID   string        `json:"channel_id"`
-	MessageID   string        `json:"message_id"`
-	AuthorID    string        `json:"author_id"`
-	Attachments []attMetadata `json:"attachments"`
-}
 
 type Local struct {
 	loc      string
@@ -83,17 +71,17 @@ func (s *Local) Store(
 	}
 
 	if includeMetadata {
-		metas := make([]msgMetadata, len(msgs))
+		metas := make([]models.MsgMetadata, len(msgs))
 		for i, msg := range msgs {
-			m := msgMetadata{
+			m := models.MsgMetadata{
 				GuildID:     msg.GuildID,
 				ChannelID:   msg.ChannelID,
 				MessageID:   msg.ID,
 				AuthorID:    msg.Author.ID,
-				Attachments: make([]attMetadata, len(msg.Attachments)),
+				Attachments: make([]models.AttMetadata, len(msg.Attachments)),
 			}
 			for j, att := range msg.Attachments {
-				m.Attachments[j] = attMetadata{
+				m.Attachments[j] = models.AttMetadata{
 					ArchiveFilename:   fmt.Sprintf("%s-%s", msg.ID, att.Filename),
 					MessageAttachment: att,
 				}
