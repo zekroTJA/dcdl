@@ -52,6 +52,7 @@ func (s *FiberServer) getFileHandler(ctx *fiber.Ctx) (err error) {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
+	ctx.Response().Header.SetContentType("application/zip")
 	return ctx.SendStream(rc, int(size))
 }
 
