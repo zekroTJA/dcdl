@@ -8,6 +8,7 @@ import (
 )
 
 type StorageProvider interface {
+	Check() (err error)
 	Store(
 		id string,
 		msgs []*discordgo.Message,

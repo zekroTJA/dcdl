@@ -35,6 +35,17 @@ func NewLocal(cfg config.ConfigProvider) (s *Local) {
 	return
 }
 
+func (s *Local) Check() (err error) {
+	fi, err := os.Stat(s.loc)
+	if err != nil {
+		return
+	}
+	if !fi.IsDir() {
+		err = ErrNotDirectory
+	}
+	return
+}
+
 func (s *Local) Store(
 	id string,
 	msgs []*discordgo.Message,

@@ -41,6 +41,9 @@ func main() {
 	}
 
 	st := storage.NewLocal(cfg)
+	if err = st.Check(); err != nil {
+		logrus.WithError(err).Fatal("storage initialization failed")
+	}
 
 	logrus.Info("Staring Discord bot session ...")
 	bot, err := discord.NewDiscordGo(cfg, st)
